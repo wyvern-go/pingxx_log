@@ -19,7 +19,7 @@ type LogConfig struct {
 }
 
 func NewConfig(p Place,filename string) LogConfig{
-	c:=LogConfig{}
+	c:=new(LogConfig)
 	c.LogPlace=p
 	c.Logfile=filename
 	return c

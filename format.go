@@ -10,7 +10,7 @@ import (
 
 type LogInfo struct {
 	LogId       string `json:"log_id"`
-	LogLevel    int    `json:"log_level"`
+	LogLevel    string    `json:"log_level"`
 	Module      string  `json:"module"`
 	LogType     string  `json:"type,omitempty"`
 	LogTime     string `json:"time"`

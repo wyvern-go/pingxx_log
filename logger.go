@@ -27,7 +27,7 @@ type Logger struct {
 	mu     sync.Mutex
 }
 
-func New(c LogConfig) *Logger {
+func New(c *LogConfig) *Logger {
 	return &Logger{config: c}
 }
 
