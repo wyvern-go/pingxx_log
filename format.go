@@ -45,7 +45,7 @@ func (info LogInfo) ToJson() ([]byte, error) {
 }
 
 func (info LogInfo) ToStd() string {
-	return fmt.Sprintf("%s [%s:%d] %s: <%s> %s", info.LogTime, info.Filename, info.Line, info.LogLevel, info.Module, info.Remark)
+	return fmt.Sprintf("%s [%s:%d] <%s> %s: %s", info.LogTime, info.Filename, info.Line, info.Module, info.LogLevel, info.Remark)
 }
 
 func (info *LogInfo) SetAcctId(acctid string) *LogInfo {
@@ -63,8 +63,12 @@ func (info *LogInfo) SetChannel(channel string) *LogInfo {
 	return info
 }
 
-func (info *LogInfo) SetMode(mode int) *LogInfo {
-	info.Mode = mode
+func (info *LogInfo) SetMode(mode bool) *LogInfo {
+	if mode {
+		info.Mode = 1
+	}else {
+		info.Mode = 0
+	}
 	return info
 }
 
@@ -83,22 +87,22 @@ func (info *LogInfo) SetUrl(requrl string) *LogInfo {
 	return info
 }
 
-func (info *LogInfo) SetRequestInfo(req *http.Request)*LogInfo {
+func (info *LogInfo) SetRequestInfo(req *http.Request) *LogInfo {
 	info.ReqMethod = req.Method
 	info.ReqHeader = ""
 	for k, v := range req.Header {
 		info.ReqHeader = info.ReqHeader + fmt.Sprintf("%s:%v;", k, v[0])
 	}
-	info.Url=strings.Split(info.Url,"?")[0]
-	info.ReqParam=strings.Split(info.Url,"?")[1]
+	info.Url = strings.Split(info.Url, "?")[0]
+	info.ReqParam = strings.Split(info.Url, "?")[1]
 	return info
 }
 
-func (info *LogInfo)SetResponseInfo(response http.Response)*LogInfo{
+func (info *LogInfo)SetResponseInfo(response http.Response) *LogInfo {
 	var by []byte
-	by,_ = ioutil.ReadAll(response.Body)
-	info.RepResult=string(by)
-	info.RepHttpcode=response.StatusCode
+	by, _ = ioutil.ReadAll(response.Body)
+	info.RepResult = string(by)
+	info.RepHttpcode = response.StatusCode
 	for k, v := range response.Header {
 		info.RepHeader = info.RepHeader + fmt.Sprintf("%s:%v;", k, v[0])
 	}

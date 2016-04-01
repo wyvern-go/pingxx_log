@@ -33,7 +33,9 @@ func (l *Logger) SetModule(module string) *Logger {
 }
 
 func (l *Logger)SetLogInfo(info *LogInfo) *Logger {
+	module:=l.info.Module
 	l.info = info
+	l.info.Module=module
 	return l
 }
 
