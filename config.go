@@ -18,7 +18,7 @@ type LogConfig struct {
 	Logfile  string
 }
 
-func NewConfig(p Place,filename string) LogConfig{
+func NewConfig(p Place,filename string) *LogConfig{
 	c:=new(LogConfig)
 	c.LogPlace=p
 	c.Logfile=filename
