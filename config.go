@@ -1,5 +1,10 @@
 package pingxx_log
 
+import (
+	"io"
+	"os"
+)
+
 type Place int
 type ContentType string
 type Level int
@@ -24,21 +29,27 @@ const (
 
 type LogConfig struct {
 	LogPlace         Place
-	Logfile          string
 	level            Level
 	PlaceContentType map[Place]ContentType
+	PlaceIoWriter map[Place]io.Writer
 }
 
-func NewConfig(filename string, p Place) *LogConfig {
+func NewConfig(p Place) *LogConfig {
 	c := new(LogConfig)
 	c.LogPlace = p
-	c.Logfile = filename
 	c.PlaceContentType = make(map[Place]ContentType)
+	c.PlaceIoWriter=make(map[Place]io.Writer)
+	c.PlaceIoWriter[ToConsole]=os.Stdout
 	return c
 }
 
 func (c *LogConfig) SetCententType(place Place, contenttype ContentType) *LogConfig {
 	c.PlaceContentType[place] = contenttype
+	return c
+}
+
+func (c *LogConfig) SetIoWriter(place Place, io_writer io.Writer) *LogConfig {
+	c.PlaceIoWriter[place] = io_writer
 	return c
 }
 

@@ -6,7 +6,6 @@ import (
 	"time"
 	"fmt"
 	"sync"
-	"os"
 	"io"
 )
 
@@ -97,18 +96,18 @@ func (l *Logger)Error(format string, a...interface{}) {
 
 func (l *Logger)ToConsole() error {
 	if v, ok := l.GetConfig().PlaceContentType[ToConsole]; ok {
-		return l.Writeplace(os.Stdout, v)
+		return l.Writeplace(l.GetConfig().PlaceIoWriter[ToConsole], v)
 	}
 	return fmt.Errorf("please set content type")
 }
 
 func (l *Logger)ToFile() error {
-	LogFile, err := os.OpenFile(l.config.Logfile, os.O_RDWR | os.O_CREATE, 0777)
-	if err != nil {
-		return err
-	}
 	if v, ok := l.GetConfig().PlaceContentType[ToFile]; ok {
-		return l.Writeplace(LogFile, v)
+		if fd,ok:=l.GetConfig().PlaceIoWriter[ToFile];ok{
+			return l.Writeplace(fd, v)
+		}else{
+			fmt.Errorf("please set IoWriter")
+		}
 	}
 	return fmt.Errorf("please set content type")
 }
