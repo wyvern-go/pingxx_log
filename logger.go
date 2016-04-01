@@ -1,4 +1,4 @@
-package pingpp_log
+package pingxx_log
 
 import (
 	"runtime"
@@ -10,20 +10,9 @@ import (
 	"io"
 )
 
-type Level int
-
-const (
-	Alert Level = iota
-	Error
-	Warn
-	Info
-	Debug
-)
-
 type Logger struct {
 	config *LogConfig
 	info   *LogInfo
-	level  Level
 	mu     sync.Mutex
 }
 
@@ -31,12 +20,20 @@ func New(c *LogConfig) *Logger {
 	return &Logger{config: c}
 }
 
+func (l *Logger) GetConfig() *LogConfig {
+	return l.config
+}
+
+func (l *Logger) GetLogInfo() *LogInfo {
+	return l.info
+}
+
 func (l *Logger) SetModule(module string) *Logger {
 	l.info.Module = module
 	return l
 }
 
-func (l *Logger)SetInfo(info *LogInfo) *Logger {
+func (l *Logger)SetLogInfo(info *LogInfo) *Logger {
 	l.info = info
 	return l
 }
@@ -46,7 +43,7 @@ func (l *Logger) Output(level string, s string) {
 	var file string
 	var line int
 	var ok bool
-	_, file, line, ok = runtime.Caller(1)
+	_, file, line, ok = runtime.Caller(2)
 	if !ok {
 		file = "???"
 		line = 0
@@ -59,47 +56,50 @@ func (l *Logger) Output(level string, s string) {
 	l.info.LogLevel = level
 	l.info.LogTime = now.Format("2006/01/02 15:04:05")
 	l.info.Remark = s
-	if l.config.LogPlace & ToConsole !=0 {
-		l.ToConsole()
-	}else if l.config.LogPlace & ToFile !=0{
-		l.ToFile()
-	}else if l.config.LogPlace & ToFile !=0&& l.config.LogPlace &ToConsole!=0 {
+	if l.config.LogPlace & ToFile != 0&& l.config.LogPlace & ToConsole != 0 {
 		l.ToFileAndStdout()
+	}else if l.config.LogPlace & ToConsole != 0 {
+		l.ToConsole()
+	}else if l.config.LogPlace & ToFile != 0 {
+		l.ToFile()
 	}
 }
 
-func (l *Logger)Debug(format string, a...interface{}) {
-	if l.level >= Debug {
-		l.Output("Debug", fmt.Sprintf(format, a))
+func (l *Logger)Debug(format string, a ...interface{}) {
+	if l.GetConfig().level >= Debug {
+		l.Output("Debug", fmt.Sprintf(format, a...))
 	}
 }
 
 func (l *Logger)Warn(format string, a...interface{}) {
-	if l.level >= Warn {
-		l.Output("Warn", fmt.Sprintf(format, a))
+	if l.GetConfig().level >= Warn {
+		l.Output("Warn", fmt.Sprintf(format, a...))
 	}
 }
 
 func (l *Logger)Alert(format string, a...interface{}) {
-	if l.level >= Alert {
-		l.Output("Alert", fmt.Sprintf(format, a))
+	if l.GetConfig().level >= Alert {
+		l.Output("Alert", fmt.Sprintf(format, a...))
 	}
 }
 
 func (l *Logger)Info(format string, a...interface{}) {
-	if l.level >= Info {
-		l.Output("Info", fmt.Sprintf(format, a))
+	if l.GetConfig().level >= Info {
+		l.Output("Info", fmt.Sprintf(format, a...))
 	}
 }
 
 func (l *Logger)Error(format string, a...interface{}) {
-	if l.level >= Error {
-		l.Output("Error", fmt.Sprintf(format, a))
+	if l.GetConfig().level >= Error {
+		l.Output("Error", fmt.Sprintf(format, a...))
 	}
 }
 
 func (l *Logger)ToConsole() error {
-	return l.Writeplace(os.Stdout)
+	if v, ok := l.GetConfig().PlaceContentType[ToConsole]; ok {
+		return l.Writeplace(os.Stdout, v)
+	}
+	return fmt.Errorf("please set content type")
 }
 
 func (l *Logger)ToFile() error {
@@ -107,38 +107,33 @@ func (l *Logger)ToFile() error {
 	if err != nil {
 		return err
 	}
-	return l.Writeplace(LogFile)
+	if v, ok := l.GetConfig().PlaceContentType[ToFile]; ok {
+		return l.Writeplace(LogFile, v)
+	}
+	return fmt.Errorf("please set content type")
 }
 
 func (l *Logger)ToFileAndStdout() error {
-	var writers []io.Writer
-	LogFile, err := os.OpenFile(l.config.Logfile, os.O_RDWR | os.O_CREATE, 0777)
+	err := l.ToConsole()
 	if err != nil {
 		return err
 	}
-	writers = append(writers, LogFile)
-	writers = append(writers, os.Stdout)
-	fileAndStdoutWriter := io.MultiWriter(writers...)
-	return l.Writeplace(fileAndStdoutWriter)
+	return l.ToFile()
 }
 
-func (l *Logger)Writeplace(iw io.Writer) error {
+func (l *Logger)Writeplace(iw io.Writer, cType ContentType) error {
 	var strByte []byte
 	var err error
-	if v, ok := PlaceContentType[l.config.LogPlace]; ok {
-		if v == JSON {
-			strByte, err = l.info.ToJson()
-			if err != nil {
-				return err
-			}
-		}else if v== STDOUTPUT {
-			strByte = []byte(l.info.ToStd())
-		}else{
-
+	if cType == JSON {
+		strByte, err = l.info.ToJson()
+		if err != nil {
+			return err
 		}
+	}else if cType == STDOUTPUT {
+		strByte = []byte(l.info.ToStd())
 	}else {
-		return fmt.Errorf("Unknow your logplace type please use SetCententType to set it")
 	}
+
 	_, err = iw.Write(strByte)
 	if err != nil {
 		return err

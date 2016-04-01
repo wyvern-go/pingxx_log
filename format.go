@@ -1,4 +1,4 @@
-package pingpp_log
+package pingxx_log
 
 import (
 	"encoding/json"
@@ -36,14 +36,8 @@ type LogInfo struct {
 	Ip          string `json:"ip,omitempty"`
 }
 
-var PlaceContentType = make(map[Place]ContentType)
-
 func NewLogInfo() *LogInfo {
 	return new(LogInfo)
-}
-
-func SetCententType(place Place, contenttype ContentType) {
-	PlaceContentType[place] = contenttype
 }
 
 func (info LogInfo) ToJson() ([]byte, error) {
@@ -51,7 +45,7 @@ func (info LogInfo) ToJson() ([]byte, error) {
 }
 
 func (info LogInfo) ToStd() string {
-	return fmt.Sprintf("%s [%s:%s] %s: <%s> %s", info.LogTime, info.Filename, info.Line, info.LogLevel, info.Mode, info.Remark)
+	return fmt.Sprintf("%s [%s:%d] %s: <%s> %s", info.LogTime, info.Filename, info.Line, info.LogLevel, info.Module, info.Remark)
 }
 
 func (info *LogInfo) SetAcctId(acctid string) *LogInfo {
