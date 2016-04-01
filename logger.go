@@ -21,8 +21,8 @@ const (
 )
 
 type Logger struct {
-	config LogConfig
-	info   LogInfo
+	config *LogConfig
+	info   *LogInfo
 	level  Level
 	mu     sync.Mutex
 }
@@ -59,11 +59,11 @@ func (l *Logger) Output(level string, s string) {
 	l.info.LogLevel = level
 	l.info.LogTime = now.Format("2006/01/02 15:04:05")
 	l.info.Remark = s
-	if l.config.LogPlace & ToConsole {
+	if l.config.LogPlace & ToConsole !=0 {
 		l.ToConsole()
-	}else if l.config.LogPlace & ToFile {
+	}else if l.config.LogPlace & ToFile !=0{
 		l.ToFile()
-	}else if l.config.LogPlace & ToFile | ToConsole {
+	}else if l.config.LogPlace & ToFile !=0&& l.config.LogPlace &ToConsole!=0 {
 		l.ToFileAndStdout()
 	}
 }
@@ -125,14 +125,19 @@ func (l *Logger)ToFileAndStdout() error {
 func (l *Logger)Writeplace(iw io.Writer) error {
 	var strByte []byte
 	var err error
-	if PlaceContentType[l.config.LogPlace] == JSON {
-		strByte, err = l.info.ToJson()
-		if err != nil {
-			return err
-		}
+	if v, ok := PlaceContentType[l.config.LogPlace]; ok {
+		if v == JSON {
+			strByte, err = l.info.ToJson()
+			if err != nil {
+				return err
+			}
+		}else if v== STDOUTPUT {
+			strByte = []byte(l.info.ToStd())
+		}else{
 
-	}else if PlaceContentType[l.config.LogPlace] == STDOUTPUT {
-		strByte = []byte(l.info.ToStd())
+		}
+	}else {
+		return fmt.Errorf("Unknow your logplace type please use SetCententType to set it")
 	}
 	_, err = iw.Write(strByte)
 	if err != nil {

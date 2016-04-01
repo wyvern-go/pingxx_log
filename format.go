@@ -89,7 +89,7 @@ func (info *LogInfo) SetUrl(requrl string) *LogInfo {
 	return info
 }
 
-func (info *LogInfo) SetRequestInfo(req *http.Request) {
+func (info *LogInfo) SetRequestInfo(req *http.Request)*LogInfo {
 	info.ReqMethod = req.Method
 	info.ReqHeader = ""
 	for k, v := range req.Header {
@@ -100,7 +100,7 @@ func (info *LogInfo) SetRequestInfo(req *http.Request) {
 	return info
 }
 
-func (info *LogInfo)SetResponseInfo(response http.Response){
+func (info *LogInfo)SetResponseInfo(response http.Response)*LogInfo{
 	var by []byte
 	by,_ = ioutil.ReadAll(response.Body)
 	info.RepResult=string(by)
@@ -131,7 +131,7 @@ func (info *LogInfo) SetRepHeader(repheader string) *LogInfo {
 	return info
 }
 
-func (info *LogInfo) SetRepHttpcode(httpcode string) *LogInfo {
+func (info *LogInfo) SetRepHttpcode(httpcode int) *LogInfo {
 	info.RepHttpcode = httpcode
 	return info
 }
