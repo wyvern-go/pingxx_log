@@ -17,7 +17,7 @@ type Logger struct {
 }
 
 func New(c *LogConfig) *Logger {
-	return &Logger{config: c}
+	return &Logger{config: c,info:new(LogInfo)}
 }
 
 func (l *Logger) GetConfig() *LogConfig {
@@ -123,17 +123,23 @@ func (l *Logger)ToFileAndStdout() error {
 
 func (l *Logger)Writeplace(iw io.Writer, cType ContentType) error {
 	var strByte []byte
+	var s string
 	var err error
 	if cType == JSON {
 		strByte, err = l.info.ToJson()
 		if err != nil {
 			return err
 		}
+		s=string(strByte)
 	}else if cType == STDOUTPUT {
 		strByte = []byte(l.info.ToStd())
+		s=string(strByte)
 	}else {
+		return fmt.Errorf("Unknow ContentType")
 	}
-
+	if len(s) == 0 || s[len(s)-1] != '\n' {
+		strByte = append(strByte, '\n')
+	}
 	_, err = iw.Write(strByte)
 	if err != nil {
 		return err
