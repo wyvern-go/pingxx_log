@@ -1,11 +1,15 @@
 ## pingxx log module
 
 - Usage:
-
-        cfg := pingxx_log.NewConfig("pingxx.log", pingxx_log.ToConsole | pingxx_log.ToFile)
+        LogFile, err = os.OpenFile(filename, os.O_RDWR | os.O_CREATE, 0777)
+        if err != nil {
+        	return err
+        }
+        cfg := pingxx_log.NewConfig(pingxx_log.ToConsole | pingxx_log.ToFile)
         cfg.SetCententType(pingxx_log.ToFile, pingxx_log.JSON)
         cfg.SetCententType(pingxx_log.ToConsole, pingxx_log.STDOUTPUT)
         cfg.SetLevel(pingxx_log.Debug)
+        cfg.SetIoWriter(pingxx_log.ToFile,LogFile)
         Glogger := pingxx_log.New(cfg)
         Glogger.SetModule("pingxx_ar")
         
