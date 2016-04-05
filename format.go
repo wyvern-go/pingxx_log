@@ -93,8 +93,14 @@ func (info *LogInfo) SetRequestInfo(req *http.Request) *LogInfo {
 	for k, v := range req.Header {
 		info.ReqHeader = info.ReqHeader + fmt.Sprintf("%s:%v;", k, v[0])
 	}
-	info.Url = strings.Split(info.Url, "?")[0]
-	info.ReqParam = strings.Split(info.Url, "?")[1]
+	splitUrl := strings.Split(info.Url, "?")
+	if len(splitUrl)==2{
+		info.Url=splitUrl[0]
+		info.ReqParam = strings.Split(info.Url, "?")[1]
+	}else  {
+		info.Url=splitUrl[0]
+		info.ReqParam = ""
+	}
 	return info
 }
 

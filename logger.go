@@ -32,11 +32,11 @@ func (l *Logger) SetModule(module string) *Logger {
 	return l
 }
 
-func (l *Logger)SetLogInfo(info *LogInfo) *Logger {
+func (l Logger)SetLogInfo(info *LogInfo) *Logger {
 	module:=l.info.Module
 	l.info = info
 	l.info.Module=module
-	return l
+	return &l
 }
 
 func (l *Logger) Output(level string, s string) {
