@@ -12,7 +12,7 @@ import (
 type Logger struct {
 	config *LogConfig
 	info   *LogInfo
-	mu     sync.Mutex
+	Mu     sync.Mutex
 }
 
 func New(c *LogConfig) *Logger {
@@ -50,8 +50,8 @@ func (l *Logger) Output(level string, s string) {
 		line = 0
 	}
 	_, filename := path.Split(file)
-	l.mu.Lock()
-	defer l.mu.Unlock()
+	l.Mu.Lock()
+	defer l.Mu.Unlock()
 	l.info.Filename = filename
 	l.info.Line = line
 	l.info.LogLevel = level

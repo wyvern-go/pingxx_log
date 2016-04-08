@@ -57,3 +57,7 @@ func (c *LogConfig)SetLevel(level Level) *LogConfig {
 	c.level = level
 	return c
 }
+
+func (c *LogConfig)GetLevel() Level {
+	return c.level
+}
