@@ -15,8 +15,8 @@ const (
 )
 
 const (
-	JSON ContentType = "JSON"
-	STDOUTPUT ContentType = "STDOUTPUT"
+	FormatJson ContentType = "Json"
+	FormatText ContentType = "Text"
 )
 
 const (
@@ -27,19 +27,23 @@ const (
 	Debug
 )
 
+var defaultCacheSize = 1024
+
 type LogConfig struct {
 	LogPlace         Place
 	level            Level
 	PlaceContentType map[Place]ContentType
-	PlaceIoWriter map[Place]io.Writer
+	PlaceIoWriter    map[Place]io.Writer
+	CacheSize        int
 }
 
 func NewConfig(p Place) *LogConfig {
 	c := new(LogConfig)
 	c.LogPlace = p
 	c.PlaceContentType = make(map[Place]ContentType)
-	c.PlaceIoWriter=make(map[Place]io.Writer)
-	c.PlaceIoWriter[ToConsole]=os.Stdout
+	c.PlaceIoWriter = make(map[Place]io.Writer)
+	c.PlaceIoWriter[ToConsole] = os.Stdout
+	c.CacheSize = defaultCacheSize
 	return c
 }
 
@@ -53,11 +57,16 @@ func (c *LogConfig) SetIoWriter(place Place, io_writer io.Writer) *LogConfig {
 	return c
 }
 
-func (c *LogConfig)SetLevel(level Level) *LogConfig {
+func (c *LogConfig) SetLevel(level Level) *LogConfig {
 	c.level = level
 	return c
 }
 
-func (c *LogConfig)GetLevel() Level {
+func (c *LogConfig) GetLevel() Level {
 	return c.level
+}
+
+func (c *LogConfig) SetCacheSize(size int) *LogConfig {
+	c.CacheSize = size
+	return c
 }
