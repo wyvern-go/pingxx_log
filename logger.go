@@ -85,7 +85,7 @@ func (l *Logger) Output(level string, s string) {
 	l.info.LogTime = now.Format("2006/01/02 15:04:05")
 	l.info.Remark = s
 	json_format, _ := l.info.ToJson()
-	if json_format[len(json_format)-1] != '\n' {
+	if json_format[len(json_format) - 1] != '\n' {
 		json_format = append(json_format, []byte("\n")...)
 	}
 	l.Cache.PushToCache(json_format)
@@ -153,6 +153,7 @@ func (l *Logger) Writeplace(iw io.Writer, cType ContentType, jsondata []byte) er
 	var strByte []byte
 	var err error
 	if cType == FormatJson {
+		strByte = jsondata
 		s = string(jsondata)
 	} else if cType == FormatText {
 		log_info := new(LogInfo)

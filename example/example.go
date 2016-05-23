@@ -19,7 +19,7 @@ func main() {
 func init() {
 	cfg := pingxx_log.NewConfig(pingxx_log.ToConsole)
 	cfg.SetCacheSize(2048) //可设置,也可以不设置,默认1024
-	cfg.SetCententType(pingxx_log.ToConsole, pingxx_log.FormatText)
+	cfg.SetCententType(pingxx_log.ToConsole, pingxx_log.FormatJson)
 	cfg.SetLevel(pingxx_log.Debug)
 	PingxxLog = pingxx_log.New(cfg)
 	PingxxLog.SetModule("example")
