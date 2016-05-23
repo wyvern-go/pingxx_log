@@ -144,27 +144,23 @@ func (l *Logger) ToFileAndStdout(jsondata []byte) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println()
 	return l.ToFile(jsondata)
 }
 
 func (l *Logger) Writeplace(iw io.Writer, cType ContentType, jsondata []byte) error {
-	var s string
 	var strByte []byte
 	var err error
 	if cType == FormatJson {
 		strByte = jsondata
-		s = string(jsondata)
 	} else if cType == FormatText {
 		log_info := new(LogInfo)
 		json.Unmarshal(jsondata, log_info)
 		strByte = []byte(log_info.ToStd())
-		s = string(strByte)
 	} else {
 		return fmt.Errorf("Unknow ContentType")
 	}
-	if len(s) == 0 || s[len(s) - 1] != '\n' {
-		strByte = append(strByte, '\n')
+	if strByte[len(strByte) - 1] != '\n' {
+		strByte = append(strByte, []byte("\n")...)
 	}
 	_, err = iw.Write(strByte)
 	if err != nil {
