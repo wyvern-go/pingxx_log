@@ -19,6 +19,7 @@ type Logger struct {
 }
 
 var output = make(chan string, 1024)
+var stop_log = make(chan bool)
 
 func New(c *LogConfig) *Logger {
 	logger := &Logger{config: c, info:new(LogInfo), Cache: NewCache(c.CacheSize)}
@@ -33,21 +34,34 @@ func (l *Logger) GetConfig() *LogConfig {
 func (l *Logger) Start() {
 	go func() {
 		for {
-			out_byte := <-output
-			for _, line := range strings.Split(out_byte, "\n") {
-				if line != "" {
-					if l.config.LogPlace & ToFile != 0&& l.config.LogPlace & ToConsole != 0 {
-						l.ToFileAndStdout([]byte(line))
-					} else if l.config.LogPlace & ToConsole != 0 {
-						l.ToConsole([]byte(line))
-					} else if l.config.LogPlace & ToFile != 0 {
-						l.ToFile([]byte(line))
+			select {
+			case out_byte := <-output:
+				for _, line := range strings.Split(out_byte, "\n") {
+					if line != "" {
+						if l.config.LogPlace & ToFile != 0&& l.config.LogPlace & ToConsole != 0 {
+							l.ToFileAndStdout([]byte(line))
+						} else if l.config.LogPlace & ToConsole != 0 {
+							l.ToConsole([]byte(line))
+						} else if l.config.LogPlace & ToFile != 0 {
+							l.ToFile([]byte(line))
+						}
 					}
-				}
 
+				}
+			case <-stop_log:
+				break
 			}
+
 		}
 	}()
+}
+
+func (l *Logger) Stop() {
+	l.Cache.Sync() //先同步日志在关闭
+	stop_log <- true
+	close(output)
+	close(stop_log)
+	l.Cache.Stop()
 }
 
 func (l *Logger) GetLogInfo() *LogInfo {

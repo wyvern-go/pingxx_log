@@ -45,6 +45,11 @@ func (c *Container) Next() *Container {
 	return c.NextContainer
 }
 
+func (b *BackEndCache) Stop() {
+	b.Container.Data.Reset()
+	b.Container.NextContainer.Data.Reset()
+}
+
 func (b *BackEndCache) CanWriter(s []byte) bool {
 	return b.In.Buffered() + len(s) < b.CacheSize
 }
