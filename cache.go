@@ -10,6 +10,7 @@ import (
 )
 
 type BackEndCache struct {
+	Switch    bool
 	CacheSize int
 	Container *Container
 	In        *bufio.Writer
@@ -37,6 +38,7 @@ func NewCache(size int) *BackEndCache {
 		CacheSize:size,
 		Container:container,
 		In: w,
+		Switch:true,
 	}
 }
 
@@ -48,6 +50,7 @@ func (c *Container) Next() *Container {
 func (b *BackEndCache) Stop() {
 	b.Container.Data.Reset()
 	b.Container.NextContainer.Data.Reset()
+	b.Switch = false
 }
 
 func (b *BackEndCache) CanWriter(s []byte) bool {
@@ -55,11 +58,15 @@ func (b *BackEndCache) CanWriter(s []byte) bool {
 }
 
 func (b *BackEndCache) PushToCache(s []byte) (int, error) {
-	if b.CanWriter(s) {
-		return b.In.Write(s)
+	if b.Switch {
+		if b.CanWriter(s) {
+			return b.In.Write(s)
+		} else {
+			b.Sync()
+			return b.In.Write(s)
+		}
 	} else {
-		b.Sync()
-		return b.In.Write(s)
+		return 0, fmt.Errorf("The cache was closed!")
 	}
 }
 
