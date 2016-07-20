@@ -102,7 +102,11 @@ func (l *Logger) Output(level string, s string) {
 	if json_format[len(json_format) - 1] != '\n' {
 		json_format = append(json_format, []byte("\n")...)
 	}
-	l.Cache.PushToCache(json_format)
+	if l.Cache.Switch {
+		l.Cache.PushToCache(json_format)
+	} else {
+		output <- string(json_format)
+	}
 }
 
 func (l *Logger) Debug(format string, a ...interface{}) {
